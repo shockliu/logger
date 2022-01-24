@@ -1,2 +1,3 @@
 # logger
 网上教程里面的golang下logger
+用来在其它模块使用，了解一下github下面各个模块相互的引用关系
