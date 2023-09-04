@@ -112,7 +112,7 @@ func (l *logManager) Output(level Level, s string) error {
 		return nil
 	}
 	if len(l._model) > 0 {
-		s = fmt.Sprintf("|%s%s%s| %s", modelColor, l._model, colorEnd, s)
+		s = fmt.Sprintf("|%s %s %s %s", modelColor, l._model, colorEnd, s)
 	}
 	switch level {
 	case LevelFatal:
@@ -187,4 +187,8 @@ func (l *logManager) SetLogLevel(level Level) {
 
 func (l *logManager) SetLogModel(model string) {
 	l._model = model
+}
+
+func SetLogModel(model string) {
+	logger._model = model
 }
