@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 type (
@@ -16,15 +18,17 @@ const (
 	LevelWarning
 	LevelInfo
 	LevelDebug
-	fatalColor   = "\033[1;37;41m"
-	errColor     = "\033[1;37;45m"
-	warningColor = "\033[1;37;43m"
-	infoColor    = "\033[1;37;42m"
-	mColor       = "\033[1;37;44m"
-	modelColor   = "\033[1;37;46m"
-	debugColor   = "\033[1;36m"
-	colorEnd     = "\033[0m"
-	entName      = "DQK"
+)
+
+var (
+	errColor   = color.New(color.BgRed, color.FgWhite).SprintfFunc()
+	fatalColor = color.New(color.BgHiRed, color.FgWhite).SprintfFunc() //"\033[1;37;41m"
+	// errColor     = "\033[1;37;45m"
+	warnColor  = color.New(color.BgYellow, color.FgWhite).SprintfFunc() //"\033[1;37;43m"
+	infoColor  = color.New(color.BgGreen, color.FgWhite).SprintfFunc()  //"\033[1;37;42m"
+	debugColor = color.New(color.FgBlack, color.BgWhite).SprintfFunc()  //"\033[1;36m"
+	entColor   = color.New(color.BgHiBlue, color.FgWhite).SprintfFunc()
+	modelColor = color.New(color.BgCyan, color.FgWhite).SprintfFunc() //"\033[1;37;43m"
 )
 
 var logger = New()
@@ -98,13 +102,13 @@ type logManager struct {
 
 // NewLogger 实例化，供自定义
 func NewLogger() *logManager {
-	return &logManager{_log: log.New(os.Stderr, "", log.Lshortfile|log.LstdFlags), logLevel: LevelDebug}
+	return &logManager{_log: log.New(os.Stderr, fmt.Sprintf("[%s] ", entColor("DQK")), log.Lshortfile|log.LstdFlags), logLevel: LevelDebug}
 }
 
 // New 实例化，供外部直接调用 log.XXXX
 func New() *logManager {
 	//return &logManager{_log: log.New(os.Stderr, "", log.Lshortfile|log.LstdFlags), logLevel: LevelDebug}
-	return &logManager{_log: log.New(os.Stdout, fmt.Sprintf("[%s%s%s] ", mColor, entName, colorEnd), log.Lshortfile|log.LstdFlags), logLevel: LevelDebug}
+	return &logManager{_log: log.New(os.Stdout, fmt.Sprintf("[%s] ", entColor("DQK")), log.Lshortfile|log.LstdFlags), logLevel: LevelDebug}
 }
 
 func (l *logManager) Output(level Level, s string) error {
@@ -112,21 +116,21 @@ func (l *logManager) Output(level Level, s string) error {
 		return nil
 	}
 	if len(l._model) > 0 {
-		s = fmt.Sprintf("|%s %s %s %s", modelColor, l._model, colorEnd, s)
+		s = fmt.Sprintf("|%s| %s", modelColor(l._model), s)
 	}
 	switch level {
 	case LevelFatal:
-		s = fmt.Sprintf("[%sFATAL%s] %s", fatalColor, colorEnd, s)
+		s = fmt.Sprintf("[%s] %s", fatalColor("FATAL"), s)
 	case LevelError:
-		s = fmt.Sprintf("[%sERROR%s] %s", errColor, colorEnd, s)
+		s = fmt.Sprintf("[%s] %s", errColor("ERROR"), s)
 	case LevelWarning:
-		s = fmt.Sprintf("[%sWARNING%s] %s", warningColor, colorEnd, s)
+		s = fmt.Sprintf("[%s] %s", warnColor("WARN"), s)
 	case LevelInfo:
-		s = fmt.Sprintf("[%sINFO%s] %s", infoColor, colorEnd, s)
+		s = fmt.Sprintf("[%s] %s", infoColor("INFO"), s)
 	case LevelDebug:
-		s = fmt.Sprintf("[%sDEBUG%s] %s", debugColor, colorEnd, s)
+		s = fmt.Sprintf("[%s] %s", debugColor("DEBUG"), s)
 	default:
-		s = fmt.Sprintf("[%sUNKNOWN%s] %s", infoColor, colorEnd, s)
+		s = fmt.Sprintf("[%s] %s", infoColor("UNKNOW"), s)
 	}
 	return l._log.Output(3, s)
 }
@@ -181,12 +185,14 @@ func (l *logManager) Check(s string, err error) {
 	}
 }
 
-func (l *logManager) SetLogLevel(level Level) {
+func (l *logManager) SetLogLevel(level Level) *logManager {
 	l.logLevel = level
+	return l
 }
 
-func (l *logManager) SetLogModel(model string) {
+func (l *logManager) SetLogModel(model string) *logManager {
 	l._model = model
+	return l
 }
 
 func SetLogModel(model string) {
